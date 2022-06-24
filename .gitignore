@@ -1,0 +1,8 @@
+/.env
+/.idea/
+/another/__pycache__/
+/handlers/__pycache__/
+/keyboards/__pycache__/
+/middlewares/__pycache__/
+/settings/__pycache__/
+/states/__pycache__/
