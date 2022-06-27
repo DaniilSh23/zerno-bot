@@ -38,8 +38,8 @@ KEYBOARD = {
     'STANDARD_BUTTON': emojize(':fuel_pump:'),
     'PAY': emojize(':yen_banknote:ОПЛАТИТЬ'),
     'ORDER_GIVEN': emojize(':package:ЗАКАЗ ПЕРЕДАН'),
-    'YES': emojize('✅ Да, пожалуйста.'),
-    'NO': emojize('❌ Нет, спасибо.'),
+    'YES': emojize('✅ Да.'),
+    'NO': emojize('❌ Нет.'),
     'CANCEL_MAKE_ORDER': emojize('❌ Отменить оформление'),
 }
 

@@ -7,7 +7,7 @@ from settings.config import ITEMS_CATEGORIES_API_URL, ITEMS_LST_API_URL, ITEMS_D
 
 @logger.catch
 async def get_items_categories(pagination_part_of_link=None):
-    '''Запрос для получения списка всех категорий работ'''
+    '''Запрос для получения списка всех категорий товаров'''
 
     if pagination_part_of_link:
         req_link = ''.join([ITEMS_CATEGORIES_API_URL, pagination_part_of_link])

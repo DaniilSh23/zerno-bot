@@ -306,3 +306,29 @@ def need_milling_formation_keyboard(message_id, answer_yes, answer_no):
 
     return inline_keyboard
 
+
+def accept_order_inline_keyboard_formation(message_id):
+    '''Формирователь клавиатуры для крайнего шага подтверждения заказа.'''
+
+    inline_keyboard = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text=KEYBOARD['YES'],
+                callback_data=callback_for_milling.new(
+                    flag='yes',
+                    message_id=message_id,
+                )
+            ),
+            InlineKeyboardButton(
+                text=KEYBOARD['CANCEL_MAKE_ORDER'],
+                callback_data=callback_for_milling.new(
+                    flag='no',
+                    message_id=message_id,
+                )
+            ),
+        ],
+    ]
+    )
+
+    return inline_keyboard
+
