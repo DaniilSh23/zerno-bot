@@ -11,7 +11,7 @@ PAY_TOKEN = os.environ.get('PAY_TOKEN', '1232131')
 
 # Телеграм ID админов
 ADMINS_ID_LST = [1978587604]
-STAFF_ID = 1978587604
+STAFF_ID = [1978587604]
 
 # абсолютный путь до текущей директории этого файла
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -38,8 +38,8 @@ KEYBOARD = {
     'STANDARD_BUTTON': emojize(':fuel_pump:'),
     'PAY': emojize(':yen_banknote:ОПЛАТИТЬ'),
     'ORDER_GIVEN': emojize(':package:ЗАКАЗ ПЕРЕДАН'),
-    'YES': emojize('✅ Да.'),
-    'NO': emojize('❌ Нет.'),
+    'YES': emojize('✅ Да'),
+    'NO': emojize('❌ Нет'),
     'CANCEL_MAKE_ORDER': emojize('❌ Отменить оформление'),
 }
 

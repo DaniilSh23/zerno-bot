@@ -1,14 +1,15 @@
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.types import CallbackQuery, ParseMode
 from aiogram.utils.emoji import emojize
 from aiogram import types
 
 from another.request_to_API import get_info_about_orders, req_for_remove_order, get_user_basket, post_req_for_add_order, \
-    clear_basket
-from keyboards.callback_data_bot import callback_for_orders_lst
-from keyboards.inline_keyboard import order_formation_inline
+    clear_basket, post_req_for_add_new_user
+from keyboards.callback_data_bot import callback_for_orders_lst, callback_for_accept_order
+from keyboards.inline_keyboard import order_formation_inline, stuff_formation_order_complete_inline
 from keyboards.reply_keyboard import ORDER_KEYBRD
-from settings.config import KEYBOARD, DP
+from settings.config import KEYBOARD, DP, BOT, STAFF_ID
 
 
 async def my_order(message: types.Message):
@@ -61,11 +62,20 @@ async def remove_order(call: CallbackQuery, callback_data: dict):
         await call.answer(text=f'{emojize(":robot:")}Запрос к серверу не удался. \nЗаказ не был удалён.', show_alert=True)
 
 
-async def add_order(message: types.Message):
+async def add_order(call: CallbackQuery, callback_data: dict, state: FSMContext):
     '''Обработчик для добавления нового заказа.'''
 
-    user_tlg_id = message.from_user.id
-    response_basket = await get_user_basket(user_tlg_id)
+    user = callback_data.get('user_tlg_id')
+    user_tlg_name = call.from_user.username
+    state_data = await state.get_data()
+    need_milling_data = state_data.get('need_milling')
+    client_name_data = state_data.get('client_name')
+    phone_number_data = state_data.get('phone_number')
+    need_shipping_data = state_data.get('need_shipping')
+    user_address_data = state_data.get('user_address')
+    print(f'{need_shipping_data, need_milling_data, client_name_data}')
+
+    response_basket = await get_user_basket(user_tlg_id=user)
     order_items = ''
     result_price = 0
     for i_item in response_basket:
@@ -81,16 +91,34 @@ async def add_order(message: types.Message):
             f'Цена за шт.: {price} руб.\n**********\n',
         ])
 
+    # Формируем данные для запроса к модели пользователя.
+    user_data = {
+        'user_tlg_id': user,
+        'user_tlg_name': user_tlg_name if user_tlg_name else None,
+        'user_name': client_name_data,
+        'last_shipping_address': user_address_data
+    }
+    response_user = await post_req_for_add_new_user(user_data=user_data)
+    if not response_user:
+        return await call.message.answer(text=f'{emojize(":robot:")} Ошибка сервера. Заказ не был создан...')
+
+    # Формируем данные POST запроса для создания нового заказа.
     order_data = {
-        'user_tlg_id': user_tlg_id,
+        'user': user,
         'order_items': order_items,
         'result_orders_price': result_price,
+        # 'pay_status': False,
+        # 'execution_status': False,
+        'need_milling': True if need_milling_data == 'yes_milling' else False,
+        'shipping': True if need_shipping_data == 'yes_ship' else False,
+        'shipping_address': user_address_data,
+        'contact_telephone': phone_number_data
     }
     response = await post_req_for_add_order(order_data)
     if response == 400:
-        await message.answer(text=f'{emojize(":robot:")} Ошибка сервера. Заказ не был создан...')
+        await call.message.answer(text=f'{emojize(":robot:")} Ошибка сервера. Заказ не был создан...')
     else:
-        order_id = response['pk']
+        order_id = response['id']
 
         # формируем текст для сообщения
         if response.get('pay_status'):
@@ -112,23 +140,30 @@ async def add_order(message: types.Message):
             text_for_message = ''.join([text_for_message, i_item, '\n'])
         text_for_message = ''.join([text_for_message, other_text])
 
-        await clear_basket(user_tlg_id)
-        i_message = await message.answer(text=text_for_message, parse_mode=ParseMode.HTML)
+        await clear_basket(user)
+        i_message = await call.message.answer(text=text_for_message, parse_mode=ParseMode.HTML)
 
         # формируем инлайн клавиатуру и обновляем сообщение, чтобы её добавить
         chat_id = i_message.chat.id
-        message_id = message.message_id
+        message_id = i_message.message_id
         inline_keyboard = order_formation_inline(order_id, chat_id, message_id)
         await i_message.edit_text(text=text_for_message, reply_markup=inline_keyboard)
+
+        # Сбрасываем машину состояний для пользователя
+        await state.reset_state(with_data=True)
+
+        # Отправляем заказ персоналу
+        for i_member in STAFF_ID:
+            inline_keyboard = stuff_formation_order_complete_inline(order_id=order_id,
+                                                                    chat_id=i_member, message_id=message_id)
+            await BOT.send_message(chat_id=i_member, text=text_for_message, reply_markup=inline_keyboard)
 
 
 def register_orders_handlers():
     DP.register_message_handler(my_order, Text(equals=KEYBOARD['X_ORDER']))
     DP.register_callback_query_handler(remove_order, callback_for_orders_lst.filter(flag='remove_order'))
-    DP.register_message_handler(add_order, Text(equals=KEYBOARD['MAKE_AN_ORDER']))
+    DP.register_callback_query_handler(add_order, callback_for_accept_order.filter(flag='yes'), state='*')
     DP.register_message_handler(my_order, Text(equals=KEYBOARD['MY_ORDER']))
-
-
 
 
 

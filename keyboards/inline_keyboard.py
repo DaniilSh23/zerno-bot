@@ -5,7 +5,8 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from keyboards.callback_data_bot import callback_for_next_or_prev_button, \
     callback_for_items_by_category, callback_for_category, \
     callback_for_add_item_to_basket, callback_back_to_categories, \
-    callback_for_minus_plus_button, callback_for_orders_lst, callback_for_stuff, callback_for_milling
+    callback_for_minus_plus_button, callback_for_orders_lst, callback_for_stuff, callback_for_milling, \
+    callback_for_accept_order
 from settings.config import KEYBOARD, RE_CATEGORY_LINK_PATTERN
 
 
@@ -272,7 +273,7 @@ def stuff_formation_order_complete_inline(order_id, chat_id, message_id):
     return inline_keyboard
 
 
-def need_milling_formation_keyboard(message_id, answer_yes, answer_no):
+def need_milling_formation_keyboard(message_id, answer_yes, answer_no, flag, user_tlg_id):
     '''Формирователь клавиатуры для шага 1 оформления заказа(помол).'''
 
     inline_keyboard = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
@@ -280,15 +281,19 @@ def need_milling_formation_keyboard(message_id, answer_yes, answer_no):
             InlineKeyboardButton(
                 text=KEYBOARD['YES'],
                 callback_data=callback_for_milling.new(
-                    flag=answer_yes,
+                    answer=answer_yes,
                     message_id=message_id,
+                    flag=flag,
+                    user_tlg_id=user_tlg_id
                 )
             ),
             InlineKeyboardButton(
                 text=KEYBOARD['NO'],
                 callback_data=callback_for_milling.new(
-                    flag=answer_no,
+                    flag=flag,
                     message_id=message_id,
+                    answer=answer_no,
+                    user_tlg_id=user_tlg_id
                 )
             ),
         ],
@@ -298,37 +303,57 @@ def need_milling_formation_keyboard(message_id, answer_yes, answer_no):
                 callback_data=callback_for_milling.new(
                     flag='cancel',
                     message_id=message_id,
+                    answer='none',
+                    user_tlg_id=user_tlg_id
                 )
             ),
         ]
     ]
     )
-
     return inline_keyboard
 
 
-def accept_order_inline_keyboard_formation(message_id):
-    '''Формирователь клавиатуры для крайнего шага подтверждения заказа.'''
+def accept_order_inline_keyboard_formation(message_id, user_tlg_id):
+    '''Формирователь клавиатуры для крайнего шага - подтверждения заказа.'''
 
     inline_keyboard = InlineKeyboardMarkup(row_width=2, inline_keyboard=[
         [
             InlineKeyboardButton(
                 text=KEYBOARD['YES'],
-                callback_data=callback_for_milling.new(
+                callback_data=callback_for_accept_order.new(
                     flag='yes',
-                    message_id=message_id,
+                    user_tlg_id=user_tlg_id,
+
                 )
             ),
             InlineKeyboardButton(
                 text=KEYBOARD['CANCEL_MAKE_ORDER'],
                 callback_data=callback_for_milling.new(
-                    flag='no',
+                    flag='cancel',
                     message_id=message_id,
+                    answer='none',
+                    user_tlg_id=user_tlg_id
                 )
             ),
         ],
     ]
     )
-
     return inline_keyboard
 
+
+def formation_cancel_order_button(message_id, user_tlg_id):
+    '''Формирование кнопки отмены заказа.'''
+
+    return InlineKeyboardMarkup(row_width=1, inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text=KEYBOARD['CANCEL_MAKE_ORDER'],
+                callback_data=callback_for_milling.new(
+                    flag='cancel',
+                    message_id=message_id,
+                    answer='none',
+                    user_tlg_id=user_tlg_id
+                )
+            )
+        ]
+    ])

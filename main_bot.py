@@ -6,6 +6,7 @@ from handlers.head_page import register_head_page_handlers
 from handlers.items_menu import register_items_menu_handlers
 from handlers.order import register_orders_handlers
 from handlers.staff import register_staff_handlers
+from handlers.steps_for_make_order import register_steps_for_make_order_handlers
 from middlewares.throttling_middleware import ThrottlingMiddleware
 from settings.config import BOT, DP
 
@@ -23,6 +24,7 @@ def register_all_handlers():
     register_basket_handlers()
     register_orders_handlers()
     register_staff_handlers()
+    register_steps_for_make_order_handlers()
 
 
 @logger.catch
