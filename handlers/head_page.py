@@ -1,11 +1,13 @@
 from aiogram import types
 from aiogram.dispatcher.filters import Command, Text
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import CallbackQuery
 from aiogram.utils.emoji import emojize
 
 from another.request_to_API import post_req_for_add_new_user
+from keyboards.callback_data_bot import callback_for_headpage
+from keyboards.inline_keyboard import inline_keyboard_for_admins
 from keyboards.reply_keyboard import MAIN_MENU
-from settings.config import KEYBOARD, DP, ADMINS_ID_LST, BOT, ADMIN_PANEL
+from settings.config import KEYBOARD, DP, BOT, STAFF_ID
 
 
 async def head_page(message: types.Message):
@@ -33,20 +35,13 @@ async def head_page(message: types.Message):
             reply_markup=MAIN_MENU)
 
 
-async def return_to_hade_page(message: types.Message):
+async def return_to_heade_page(message: types.Message):
     '''Реакция бота на нажатие кнопки ГЛАВНАЯ'''
 
     await message.answer(f'Вы перешли к главному меню', reply_markup=MAIN_MENU)
 
-    if message.from_user.id in ADMINS_ID_LST:
-        inline_keyboard = InlineKeyboardMarkup(
-            row_width=1,
-            inline_keyboard=[
-                [
-                    InlineKeyboardMarkup(text='Админ панель', url=ADMIN_PANEL),
-                ]
-            ],
-        )
+    if message.from_user.id in STAFF_ID:
+        inline_keyboard = inline_keyboard_for_admins()
         await message.answer(text=f'Админ панель', reply_markup=inline_keyboard)
 
 
@@ -74,10 +69,17 @@ async def about_cafe(message: types.Message):
     await message.answer(text=text_about_cafe)
 
 
+async def head_page_from_order(call: CallbackQuery):
+
+    await call.answer(text='Главное меню')
+    await call.message.answer(text='Вы перешли к главному меню.', reply_markup=MAIN_MENU)
+
+
 def register_head_page_handlers():
     '''Функция для регистрации обработчиков'''
 
     DP.register_message_handler(head_page, Command(['start', 'home', ]))
-    DP.register_message_handler(return_to_hade_page, Text(equals=[KEYBOARD['HEAD_PAGE']]))
+    DP.register_message_handler(return_to_heade_page, Text(equals=[KEYBOARD['HEAD_PAGE']]))
     DP.register_message_handler(about_cafe, Text(equals=[KEYBOARD['INFO']]))
     DP.register_message_handler(send_media_id, content_types=types.ContentTypes.PHOTO)
+    DP.register_callback_query_handler(head_page_from_order, callback_for_headpage.filter(flag='head'))

@@ -11,7 +11,7 @@ PAY_TOKEN = os.environ.get('PAY_TOKEN', '1232131')
 
 # Телеграм ID админов
 ADMINS_ID_LST = [1978587604]
-STAFF_ID = [1978587604]
+STAFF_ID = [1978587604, 1196122460]
 
 # абсолютный путь до текущей директории этого файла
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -63,7 +63,7 @@ ITEMS_DETAIL_API_URL = f'{DOMAIN_NAME}api/item_detail/?item_id='
 PAY_ORDER_INFO = f'{DOMAIN_NAME}api/pay_order/'
 ORDER_ARCHIVE = f'{DOMAIN_NAME}api/order_archive/'
 ADMIN_PANEL = f'{DOMAIN_NAME}admin/'
-ADD_NEW_USER = f'{DOMAIN_NAME}api/add_new_user/'
+BOT_USER = f'{DOMAIN_NAME}api/bot_user/'
 
 # объекты: бот, диспатчер, сторэдж для машины состояний
 BOT = Bot(token=TOKEN, parse_mode='HTML')

@@ -6,8 +6,8 @@ from keyboards.callback_data_bot import callback_for_next_or_prev_button, \
     callback_for_items_by_category, callback_for_category, \
     callback_for_add_item_to_basket, callback_back_to_categories, \
     callback_for_minus_plus_button, callback_for_orders_lst, callback_for_stuff, callback_for_milling, \
-    callback_for_accept_order
-from settings.config import KEYBOARD, RE_CATEGORY_LINK_PATTERN
+    callback_for_accept_order, callback_for_headpage, callback_for_admins_orders_lst
+from settings.config import KEYBOARD, RE_CATEGORY_LINK_PATTERN, ADMIN_PANEL
 
 
 def category_item_formation_keyboard(response_data, message_id):
@@ -239,14 +239,11 @@ def order_formation_inline(order_id, chat_id, message_id):
         ],
         [
             InlineKeyboardButton(
-                text=KEYBOARD['PAY'],
-                callback_data=callback_for_orders_lst.new(
-                    flag='pay_order',
-                    order_id=order_id,
-                    chat_id=chat_id,
-                    message_id=message_id,
+                text=KEYBOARD['HEAD_PAGE'],
+                callback_data=callback_for_headpage.new(
+                    flag='head',
                 )
-            ),
+            )
         ]
     ])
     return inline_keyboard
@@ -266,6 +263,17 @@ def stuff_formation_order_complete_inline(order_id, chat_id, message_id):
                     message_id=message_id,
                 )
             )
+        ],
+        [
+            InlineKeyboardButton(
+                text=KEYBOARD['X_ORDER'],
+                callback_data=callback_for_orders_lst.new(
+                    flag='remove_order',
+                    order_id=order_id,
+                    chat_id=chat_id,
+                    message_id=message_id,
+                )
+            ),
         ],
     ]
     )
@@ -357,3 +365,21 @@ def formation_cancel_order_button(message_id, user_tlg_id):
             )
         ]
     ])
+
+
+def inline_keyboard_for_admins():
+    '''Формирователь клавиатуры для админов.'''
+
+    return InlineKeyboardMarkup(
+        row_width=1,
+        inline_keyboard=[
+            [
+                InlineKeyboardMarkup(text='Админ панель', url=ADMIN_PANEL),
+            ],
+            [
+                InlineKeyboardMarkup(text='Список заказов', callback_data=callback_for_admins_orders_lst.new(
+                    flag='orderslst'
+                ))
+            ]
+        ],
+    )

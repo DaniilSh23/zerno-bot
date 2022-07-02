@@ -4,6 +4,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.types import CallbackQuery, ReplyKeyboardRemove, InlineKeyboardMarkup
 
 from another.accept_order import check_and_accept_order
+from another.request_to_API import get_user_basket
 from keyboards.callback_data_bot import callback_for_milling
 from keyboards.inline_keyboard import need_milling_formation_keyboard, accept_order_inline_keyboard_formation, \
     formation_cancel_order_button
@@ -14,6 +15,12 @@ from states.states import MakeOrderStates
 
 async def need_milling(message: types.Message):
     '''Первый шаг оформления заказа - спрашиваем о необходимости помола зерна.'''
+
+    # Проверяем, что в корзине добавлены товары
+    response_basket = await get_user_basket(user_tlg_id=message.from_user.id)
+    if len(response_basket) == 0:
+        await message.answer(text='Ваша корзина пуста...')
+        return
 
     await message.answer(text='Оформляем Ваш заказ.', reply_markup=ReplyKeyboardRemove())
     await MakeOrderStates.need_milling.set()

@@ -1,4 +1,5 @@
 from another.request_to_API import get_user_basket
+from settings.config import STORE_ADDRESS
 
 
 async def check_and_accept_order(user_tlg_id, need_milling_data, client_name_data,
@@ -19,7 +20,8 @@ async def check_and_accept_order(user_tlg_id, need_milling_data, client_name_dat
                        f'<b>Доставка:</b> {user_address_data if need_shipping_data=="yes_ship" else "не требуется"}\n' \
                        f'<b>Имя:</b> {client_name_data}\n' \
                        f'<b>Телефон:</b> {phone_number_data}\n\n' \
-                       f'<b>Состав заказа:</b>\n'
+                       f'<b>Состав заказа:</b>\n' \
+                       f'<b>Наш адрес:</b> {STORE_ADDRESS}'
     total_price = 0
     for i_num, i_item in enumerate(response):
         item_name = i_item[1]

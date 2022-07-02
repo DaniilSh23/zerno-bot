@@ -13,3 +13,5 @@ callback_for_orders_lst = CallbackData('@', 'flag', 'order_id', 'chat_id', 'mess
 callback_for_stuff = CallbackData('@', 'flag', 'order_id', 'chat_id', 'message_id')
 callback_for_milling = CallbackData('@', 'flag', 'answer', 'message_id', 'user_tlg_id')
 callback_for_accept_order = CallbackData('@', 'flag', 'user_tlg_id')
+callback_for_headpage = CallbackData('@', 'flag')
+callback_for_admins_orders_lst = CallbackData('@', 'flag')

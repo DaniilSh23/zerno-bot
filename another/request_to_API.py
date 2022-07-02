@@ -2,7 +2,7 @@ import aiohttp
 from loguru import logger
 from settings.config import ITEMS_CATEGORIES_API_URL, ITEMS_LST_API_URL, ITEMS_DETAIL_API_URL, \
     ADD_ITEMS_IN_BASKET_API_URL, BASKET_API_URL, REMOVE_ITEMS_FROM_BASKET_API_URL, CLEAR_BASKET_API_URL, ORDERS_API_URL, \
-    REMOVE_ORDER_API_URL, PAY_ORDER_INFO, ORDER_ARCHIVE, ADD_NEW_USER
+    REMOVE_ORDER_API_URL, PAY_ORDER_INFO, ORDER_ARCHIVE, BOT_USER
 
 
 @logger.catch
@@ -110,6 +110,8 @@ async def get_info_about_orders(user_tlg_id=None, order_id=None):
         req_link = ''.join([ORDERS_API_URL, f'?user_tlg_id={user_tlg_id}'])
     elif order_id:
         req_link = ''.join([ORDERS_API_URL, f'?order_id={order_id}'])
+    elif not user_tlg_id and not order_id:
+        req_link = ORDERS_API_URL
     else:
         raise Exception('Не переданы параметры для запроса.')
 
@@ -129,7 +131,7 @@ async def get_info_about_orders(user_tlg_id=None, order_id=None):
 async def req_for_remove_order(order_id):
     '''Запрос для удаления заказа.'''
 
-    req_link = ''.join([REMOVE_ORDER_API_URL, f'?pk={order_id}'])
+    req_link = ''.join([REMOVE_ORDER_API_URL, f'?id={order_id}'])
     async with aiohttp.ClientSession() as session:
         async with session.get(req_link) as response:
             async with response:
@@ -186,11 +188,25 @@ async def post_req_for_add_order_to_archive(order_data):
 async def post_req_for_add_new_user(user_data):
     '''POST запрос для создания в БД записи о новом пользователе.'''
 
-    req_link = ''.join([ADD_NEW_USER])
+    req_link = ''.join([BOT_USER])
     async with aiohttp.ClientSession() as session:
         async with session.post(url=req_link, data=user_data) as response:
             async with response:
                 if response.status == 200:
                     return True
+                else:
+                    return False
+
+
+@logger.catch
+async def get_user_info(user_id):
+    '''POST запрос для создания в БД записи о новом пользователе.'''
+
+    req_link = ''.join([BOT_USER, f"?user_id={user_id}"])
+    async with aiohttp.ClientSession() as session:
+        async with session.get(req_link) as response:
+            async with response:
+                if response.status == 200:
+                    return await response.json()
                 else:
                     return False

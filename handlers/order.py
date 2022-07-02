@@ -6,7 +6,8 @@ from aiogram import types
 
 from another.request_to_API import get_info_about_orders, req_for_remove_order, get_user_basket, post_req_for_add_order, \
     clear_basket, post_req_for_add_new_user
-from keyboards.callback_data_bot import callback_for_orders_lst, callback_for_accept_order
+from keyboards.callback_data_bot import callback_for_orders_lst, callback_for_accept_order, \
+    callback_for_admins_orders_lst
 from keyboards.inline_keyboard import order_formation_inline, stuff_formation_order_complete_inline
 from keyboards.reply_keyboard import ORDER_KEYBRD
 from settings.config import KEYBOARD, DP, BOT, STAFF_ID
@@ -22,7 +23,7 @@ async def my_order(message: types.Message):
         await message.answer(text=f'{emojize(":robot:")} Не удалось выполнить запрос к серверу...')
     else:
         for i_order in response:
-            order_id = i_order.get('pk')
+            order_id = i_order.get('id')
             if i_order.get('pay_status'):
                 pay_status = 'Оплачен'
             else:
@@ -107,8 +108,8 @@ async def add_order(call: CallbackQuery, callback_data: dict, state: FSMContext)
         'user': user,
         'order_items': order_items,
         'result_orders_price': result_price,
-        # 'pay_status': False,
-        # 'execution_status': False,
+        'pay_status': False,
+        'execution_status': False,
         'need_milling': True if need_milling_data == 'yes_milling' else False,
         'shipping': True if need_shipping_data == 'yes_ship' else False,
         'shipping_address': user_address_data,
@@ -164,7 +165,6 @@ def register_orders_handlers():
     DP.register_callback_query_handler(remove_order, callback_for_orders_lst.filter(flag='remove_order'))
     DP.register_callback_query_handler(add_order, callback_for_accept_order.filter(flag='yes'), state='*')
     DP.register_message_handler(my_order, Text(equals=KEYBOARD['MY_ORDER']))
-
 
 
 
